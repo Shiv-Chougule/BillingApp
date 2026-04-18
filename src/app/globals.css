@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Global border color — light mode (gray-300: clearly visible on white) */
+  --border: #d1d5db;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* Expose border variable as a Tailwind color utility (use: border-border) */
+  --color-border: var(--border);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+
+    /* Global border color — dark mode (gray-600: visible but not harsh) */
+    --border: #d2d3d4;
+  }
+}
+
+/* Class-based dark mode support (e.g. <html class="dark">) */
+.dark {
+  --border: #4b5563;
+  /* gray-600 */
+}
+
+/*
+  Scoped border color — applies ONLY to elements that use a plain Tailwind
+  border-width utility (border, border-2, etc.) WITHOUT an explicit color class.
+  Uses :where() for zero added specificity so any border-{color} class still wins.
+  
+  This avoids:
+    1. Overriding intentional colours like border-blue-500, border-red-500.
+    2. Painting --border (light gray) on ALL elements before JS dark-mode hydrates,
+       which caused the "thick white border flash" on first render in dark mode.
+*/
+:where(.border, .border-x, .border-y,
+  .border-t, .border-r, .border-b, .border-l,
+  .border-2, .border-4, .border-8,
+  .border-x-2, .border-y-2) {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ─── Hide Scrollbars Globally ──────────────────────────────────────────────
+   Hides the scrollbar track on ALL scrollable elements site-wide.
+   Scrolling behaviour is preserved — only the visual bar is hidden.
+   - Chrome / Safari / Edge : ::-webkit-scrollbar { width: 0 }
+   - Firefox                : scrollbar-width: none
+   - IE / old Edge          : -ms-overflow-style: none
+────────────────────────────────────────────────────────────────────────────── */
+* {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE / old Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Edge */
+}
+
+/* .hide-scrollbar — utility class already used throughout the project.
+   Kept as an explicit class so individual elements can also be targeted
+   directly without relying solely on the global rule above. */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
