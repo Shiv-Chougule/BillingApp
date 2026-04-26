@@ -30,6 +30,9 @@ export const useAdminStore = create((set, get) => ({
       'expenses': 'Expenses',
       'payments': 'Payments',
       'performa': 'Performa Invoices',
+      'vendor': 'Vendor',
+      'purchase': 'Purchase',
+      'stocks': 'Stocks',
     };
     return pageLabels[activePage] || activePage;
   },

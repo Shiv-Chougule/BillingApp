@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
+import connectDB from '../../../../lib/mongodb';
 import Invoice from '../../models/PerformaInvoice';
 import Customer from '../../models/Customer';
 import Stock from '../../models/Stocks';
@@ -12,11 +12,11 @@ export async function POST(request) {
     console.log("Incoming data:", body);
 
     // Validate required fields - only these are required 
-const requiredFields = [
-  'customer','invoiceNumber', 'salesperson',
-  'invoiceDate', 'dueDate', 'items'
-];
-    
+    const requiredFields = [
+      'customer', 'invoiceNumber', 'salesperson',
+      'invoiceDate', 'dueDate', 'items'
+    ];
+
     const missingFields = requiredFields.filter(field => !body[field]);
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -41,14 +41,14 @@ const requiredFields = [
         { status: 404 }
       );
     }
-      // Check if stock exists
-      const stockExists = await Stock.findById(body.stock);
-      if (!stockExists) {
-        return NextResponse.json(
-          { error: "Stock not found with the provided ID" },
-          { status: 404 }
-        );
-      }
+    // Check if stock exists
+    const stockExists = await Stock.findById(body.stock);
+    if (!stockExists) {
+      return NextResponse.json(
+        { error: "Stock not found with the provided ID" },
+        { status: 404 }
+      );
+    }
     // Check for duplicate invoice number
     const existingInvoice = await Invoice.findOne({ invoiceNumber: body.invoiceNumber });
     if (existingInvoice) {
@@ -81,7 +81,7 @@ const requiredFields = [
     } catch (dateError) {
       console.error('Date validation failed:', dateError);
       return NextResponse.json(
-        { 
+        {
           error: "Invalid date format",
           details: dateError.message,
           expectedFormat: "YYYY-MM-DD",
@@ -103,7 +103,7 @@ const requiredFields = [
     }
 
     const validatedItems = body.items.map(item => {
-      const amount = item.amount || item.price * item.quantity * (1 + (item.gst || 0)/100);
+      const amount = item.amount || item.price * item.quantity * (1 + (item.gst || 0) / 100);
       return {
         name: item.name,
         quantity: Math.max(1, item.quantity || 1),
@@ -111,29 +111,29 @@ const requiredFields = [
         gst: Math.max(0, item.gst || 0),
         discount: Math.max(0, item.discount || 0),
         amount: parseFloat(amount.toFixed(2) || Number(item.amount)),
-        stockId: item.stockId || null 
+        stockId: item.stockId || null
       };
     });
 
     // Calculate totals (unchanged)
     const calculatedSubTotal = validatedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const calculatedTotal = calculatedSubTotal + 
-      validatedItems.reduce((sum, item) => sum + (item.price * item.quantity * item.gst/100), 0) +
-      (body.adjustment || 0) - 
+    const calculatedTotal = calculatedSubTotal +
+      validatedItems.reduce((sum, item) => sum + (item.price * item.quantity * item.gst / 100), 0) +
+      (body.adjustment || 0) -
       (body.discount || 0);
 
-      let stockValue = null;
-if (body.stock) {
-  stockValue = body.stock;
-} else {
-  // Try to get stock from items, or use null
-  const stockItems = validatedItems.filter(item => item.stockId);
-  stockValue = stockItems.length > 0 ? stockItems[0].stockId : null;
-}
+    let stockValue = null;
+    if (body.stock) {
+      stockValue = body.stock;
+    } else {
+      // Try to get stock from items, or use null
+      const stockItems = validatedItems.filter(item => item.stockId);
+      stockValue = stockItems.length > 0 ? stockItems[0].stockId : null;
+    }
     // Create new invoice with customer reference
     const newInvoice = new Invoice({
       customer: body.customer,
-      stock: stockValue,  
+      stock: stockValue,
       invoiceNumber: body.invoiceNumber,
       salesperson: body.salesperson || '',
       orderNumber: body.orderNumber || '',
@@ -149,14 +149,14 @@ if (body.stock) {
       discount: body.discount || 0,
       total: body.total || calculatedTotal,
       totalPaid: body.paymentStatus === 'paid' ? (body.total) : 0,
-      
+
     });
 
     await newInvoice.save();
     return NextResponse.json(
-      { 
+      {
         message: 'Invoice created successfully',
-        invoice: newInvoice 
+        invoice: newInvoice
       },
       { status: 201 }
     );
@@ -164,7 +164,7 @@ if (body.stock) {
   } catch (error) {
     console.error("Server error:", error);
     return NextResponse.json(
-      {  
+      {
         error: "Internal server error",
         ...(process.env.NODE_ENV === 'development' && {
           details: error.message,
@@ -245,11 +245,11 @@ export async function PUT(request) {
   } catch (error) {
     console.error('Error updating invoice status:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Failed to update invoice status',
-        message: error.message 
-      }, 
+        message: error.message
+      },
       { status: 500 }
     );
   }
@@ -262,7 +262,7 @@ export async function GET(request) {
     const performaInvoices = await PerformaInvoice.find();
 
     // Return the performa invoices as an array of objects
-    return NextResponse.json(performaInvoices.map(invoice => ({ invoice })), { status: 200 });
+    return NextResponse.json(performaInvoices, { status: 200 });
   } catch (error) {
     console.error('GET API error:', error.message, error.stack);
     return NextResponse.json({ error: 'Failed to fetch performa invoices' }, { status: 500 });
@@ -272,11 +272,11 @@ export async function GET(request) {
 export async function DELETE(request) {
   try {
     await connectDB();
-    
+
     // Extract ID from URL search parameters
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     // Validate ID exists
     if (!id) {
       return NextResponse.json(
@@ -295,7 +295,7 @@ export async function DELETE(request) {
 
     // Delete the invoice
     const deletedInvoice = await Invoice.findByIdAndDelete(id);
-    
+
     // Check if invoice was found and deleted
     if (!deletedInvoice) {
       return NextResponse.json(
@@ -306,7 +306,7 @@ export async function DELETE(request) {
 
     // Successful response
     return NextResponse.json(
-      { 
+      {
         success: true,
         message: `Invoice ${deletedInvoice.invoiceNumber} deleted successfully`,
         deletedInvoiceId: deletedInvoice._id
@@ -316,11 +316,11 @@ export async function DELETE(request) {
   } catch (error) {
     console.error('Delete invoice error:', error);
     return NextResponse.json(
-      { 
+      {
         success: false,
         error: 'Failed to delete invoice',
-        message: error.message 
-      }, 
+        message: error.message
+      },
       { status: 500 }
     );
   }

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
+import connectDB from '../../../../lib/mongodb';
 import Vendor from '../../models/Vendor';
 
 export async function POST(request) {
@@ -95,7 +95,7 @@ export async function GET(request) {
     const vendors = await Vendor.find();
 
     // Return the vendors as an array of objects
-    return NextResponse.json(vendors.map(vendor => ({ vendor })), { status: 200 });
+    return NextResponse.json(vendors, { status: 200 });
   } catch (error) {
     console.error('GET API error:', error.message, error.stack);
     return NextResponse.json({ error: 'Failed to fetch vendors' }, { status: 500 });
@@ -115,9 +115,9 @@ export async function PUT(request) {
     }
 
     const body = await request.json();
-    
+
     const updatedVendor = await Vendor.findByIdAndUpdate(
-      vendorId, 
+      vendorId,
       body, // Use entire body as update data
       { new: true }
     );
@@ -126,25 +126,25 @@ export async function PUT(request) {
       return NextResponse.json({ error: 'Vendor not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ 
-      message: 'Vendor updated successfully', 
-      vendor: updatedVendor 
+    return NextResponse.json({
+      message: 'Vendor updated successfully',
+      vendor: updatedVendor
     });
   } catch (error) {
     console.error('Error updating vendor:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       error: 'Internal Server Error',
-      details: error.message 
+      details: error.message
     }, { status: 500 });
   }
 }
 export async function DELETE(request) {
   try {
     await connectDB();
-    
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Vendor ID is required' },
@@ -153,7 +153,7 @@ export async function DELETE(request) {
     }
 
     const deletedVendor = await Vendor.findByIdAndDelete(id);
-    
+
     if (!deletedVendor) {
       return NextResponse.json(
         { error: 'Vendor not found' },
@@ -162,9 +162,9 @@ export async function DELETE(request) {
     }
 
     return NextResponse.json(
-      { 
+      {
         message: 'Vendor deleted successfully',
-        vendor: deletedVendor 
+        vendor: deletedVendor
       },
       { status: 200 }
     );

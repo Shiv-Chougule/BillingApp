@@ -30,7 +30,7 @@ const iconComponents = {
 function Header() {
   // Get state and methods from zustand store
   const { dark, setTheme, activePage } = useAdminStore();
-  
+
   // Function to get page label based on activePage state
   const getPageLabel = () => {
     const pageLabels = {
@@ -43,7 +43,7 @@ function Header() {
     };
     return pageLabels[activePage] || activePage || 'Dashboard';
   };
-  
+
   // Function to get icon based on activePage state
   const getIcon = () => {
     const pageToIconMap = {
@@ -57,10 +57,10 @@ function Header() {
     };
     return iconComponents[pageToIconMap[activePage]?.name] || House;
   };
-  
+
   const Icon = getIcon();
   const pageLabel = getPageLabel();
-  
+
   // Theme-based styles (unchanged)
   const headerBg = dark ? 'bg-gray-800' : 'bg-white';
   const headerText = dark ? 'text-white' : 'text-gray-800';
@@ -69,9 +69,9 @@ function Header() {
   const handleThemeToggle = () => {
     setTheme();
   };
-  
+
   return (
-    <div className={`print:hidden w-full ${headerBg} transition-colors duration-300 border-b-1`}>
+    <div className={`print:hidden w-full ${headerBg} transition-colors duration-300 border-b`}>
       {/* Only show desktop header - mobile header is handled by Sidebar */}
       <div className="flex justify-between items-center p-4">
         <div className={`flex items-center font-bold ${headerText}`}>
@@ -83,9 +83,8 @@ function Header() {
         </div>
         <button
           onClick={handleThemeToggle}
-          className={`p-2 rounded-full transition-colors duration-300 ${
-            dark ? 'bg-gray-700 hover:bg-gray-600 text-yellow-300' : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
-          }`}
+          className={`p-2 rounded-full transition-colors duration-300 ${dark ? 'bg-gray-700 hover:bg-gray-600 text-yellow-300' : 'bg-blue-100 hover:bg-blue-200 text-blue-600'
+            }`}
           aria-label={dark ? 'Switch to light mode' : 'Switch to dark mode'}
         >
           {dark ? <Sun size={20} /> : <Moon size={20} />}

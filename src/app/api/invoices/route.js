@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
+import connectDB from '../../../../lib/mongodb';
 import Invoice from '../../models/Invoice';
 import Customer from '../../models/Customer';
 import Stock from '../../models/Stocks';
@@ -619,7 +619,7 @@ export async function GET(request) {
     }
 
     // Default response (no customerId) — return flat array to maintain backward compatibility
-    return NextResponse.json(invoices.map(invoice => ({ invoice })), { status: 200 });
+    return NextResponse.json(invoices, { status: 200 });
 
   } catch (error) {
     console.error('GET API error:', error.message, error.stack);
