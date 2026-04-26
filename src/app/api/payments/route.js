@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
+import connectDB from '../../../../lib/mongodb';
 import Payment from '../../models/Payments';
 import mongoose from 'mongoose';
 
@@ -75,7 +75,7 @@ export async function GET(request) {
     const payments = await Payment.find();
 
     // Return the payments as an array of objects
-    return NextResponse.json(payments.map(payment => ({ payment })), { status: 200 });
+    return NextResponse.json(payments, { status: 200 });
   } catch (error) {
     console.error('GET API error:', error.message, error.stack);
     return NextResponse.json({ error: 'Failed to fetch payments' }, { status: 500 });

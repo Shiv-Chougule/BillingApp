@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
+import connectDB from '../../../../lib/mongodb';
 import Item from '../../models/Expenses';
 
 // POST: Create new item
@@ -10,21 +10,21 @@ export async function POST(request) {
     const body = await request.json();
 
     const {
-        category,
-        date,
-        amount,
-        paymentMethod,
-        description,
-        invoiceID
+      category,
+      date,
+      amount,
+      paymentMethod,
+      description,
+      invoiceID
     } = body;
 
     const newItem = new Item({
-        category,
-        date,
-        amount,
-        paymentMethod,
-        description,
-        invoiceID
+      category,
+      date,
+      amount,
+      paymentMethod,
+      description,
+      invoiceID
     });
 
     await newItem.save();
@@ -44,7 +44,7 @@ export async function GET() {
     const items = await Item.find();
 
     // Return the items as an array of objects
-    return NextResponse.json(items.map(item => ({ item })), { status: 200 });
+    return NextResponse.json(items, { status: 200 });
   } catch (error) {
     console.error('GET API error:', error.message, error.stack);
     return NextResponse.json({ error: 'Failed to fetch items' }, { status: 500 });

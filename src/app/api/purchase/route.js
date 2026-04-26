@@ -1,13 +1,13 @@
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
+import connectDB from '../../../../lib/mongodb';
 import Purchase from '../../models/Purchase';
 import Stock from '../../models/Stocks';
 
 export async function POST(request) {
   try {
     await connectDB(); // Connect to MongoDB
- 
+
     const body = await request.json();
 
     const {
@@ -42,7 +42,7 @@ export async function POST(request) {
       total === undefined
     ) {
       return NextResponse.json(
-        { error: 'Missing required fields: vendor, purchaseOrder, purchaseDate, dueDate, items, subTotal, and total are required' }, 
+        { error: 'Missing required fields: vendor, purchaseOrder, purchaseDate, dueDate, items, subTotal, and total are required' },
         { status: 400 }
       );
     }
@@ -59,7 +59,7 @@ export async function POST(request) {
     // Update stock quantities before creating the purchase
     const stockUpdates = [];
     const stockItems = [];
-    
+
     for (const item of items) {
       if (item.itemId) {
         // Validate stock item exists
@@ -70,28 +70,28 @@ export async function POST(request) {
             { status: 400 }
           );
         }
-        
+
         // Add to stock updates
         stockUpdates.push({
           updateOne: {
             filter: { _id: item.itemId },
-            update: { 
+            update: {
               $inc: { quantity: item.quantity },
-              $set: { 
+              $set: {
                 purchasePrice: item.price, // Set the purchase price from the purchase item
                 lastUpdated: new Date()
               }
             }
           }
         });
-        
+
         stockItems.push(item.itemId);
       }
     }
-      // Update all stock items in bulk
-      if (stockUpdates.length > 0) {
-        await Stock.bulkWrite(stockUpdates);
-      }
+    // Update all stock items in bulk
+    if (stockUpdates.length > 0) {
+      await Stock.bulkWrite(stockUpdates);
+    }
 
     // Save the purchase
     const newPurchase = new Purchase({
@@ -126,9 +126,9 @@ export async function POST(request) {
     await newPurchase.save();
 
     return NextResponse.json(
-      { 
-        message: 'Purchase created successfully', 
-        purchase: newPurchase 
+      {
+        message: 'Purchase created successfully',
+        purchase: newPurchase
       },
       { status: 201 }
     );
@@ -136,11 +136,11 @@ export async function POST(request) {
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json(
-      { 
-        error: 'Internal Server Error', 
+      {
+        error: 'Internal Server Error',
         details: error.message,
-        ...(error.code === 11000 && { 
-          duplicateError: 'Purchase order number must be unique' 
+        ...(error.code === 11000 && {
+          duplicateError: 'Purchase order number must be unique'
         })
       },
       { status: 500 }
@@ -154,7 +154,7 @@ export async function GET(request) {
     const purchases = await Purchase.find();
 
     // Return the purchases as an array of objects
-    return NextResponse.json(purchases.map(purchase => ({ purchase })), { status: 200 });
+    return NextResponse.json(purchases, { status: 200 });
   } catch (error) {
     console.error('GET API error:', error.message, error.stack);
     return NextResponse.json({ error: 'Failed to fetch purchases' }, { status: 500 });

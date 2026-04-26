@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
-import Item from '../../models/Stocks'; 
+import connectDB from '../../../../lib/mongodb';
+import Item from '../../models/Stocks';
 
 // POST: Create new item
 export async function POST(request) {
@@ -9,13 +9,13 @@ export async function POST(request) {
     const body = await request.json();
 
     const {
-      category, 
-      name, 
+      category,
+      name,
       quantity,
-      type, 
-      HSNCode, 
+      type,
+      HSNCode,
       itemCode,
-      sellingPrice, 
+      sellingPrice,
       purchasePrice,
       account
     } = body;
@@ -49,7 +49,7 @@ export async function GET(request) {
     const stocks = await Stock.find();
 
     // Return the stocks as an array of objects
-    return NextResponse.json(stocks.map(stock => ({ stock })), { status: 200 });
+    return NextResponse.json(stocks, { status: 200 });
   } catch (error) {
     console.error('GET API error:', error.message, error.stack);
     return NextResponse.json({ error: 'Failed to fetch stocks' }, { status: 500 });
@@ -61,12 +61,12 @@ export async function PUT(request) {
     await connectDB();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Item ID is required' },
         { status: 400 }
-      );  
+      );
     }
 
     const body = await request.json();
@@ -84,7 +84,7 @@ export async function PUT(request) {
     }
 
     let update = {};
-    
+
     // Handle quantity increment/decrement if action is specified
     if (action) {
       if (!['increment', 'decrement'].includes(action)) {
@@ -106,9 +106,9 @@ export async function PUT(request) {
       // Prevent negative stock
       if (action === 'decrement' && item.quantity < quantity) {
         return NextResponse.json(
-          { 
+          {
             error: `Insufficient stock. Available: ${item.quantity}`,
-            availableQuantity: item.quantity 
+            availableQuantity: item.quantity
           },
           { status: 400 }
         );
@@ -123,7 +123,7 @@ export async function PUT(request) {
       if (action && updateData.hasOwnProperty('quantity')) {
         delete updateData.quantity;
       }
-      
+
       // Add the remaining update data
       Object.keys(updateData).forEach(key => {
         update[key] = updateData[key];
@@ -141,12 +141,12 @@ export async function PUT(request) {
     console.log('Updated item:', updatedItem); // Debug log
 
     return NextResponse.json(
-      { 
+      {
         message: 'Item updated successfully',
         item: updatedItem,
-        ...(action && { 
+        ...(action && {
           actionPerformed: action,
-          quantityChanged: quantity 
+          quantityChanged: quantity
         })
       },
       { status: 200 }
@@ -154,7 +154,7 @@ export async function PUT(request) {
   } catch (error) {
     console.error('PUT /api/stocks error:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Server error',
         details: error.message,
         stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
@@ -167,10 +167,10 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     await connectDB();
-    
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'stock ID is required' },
@@ -179,7 +179,7 @@ export async function DELETE(request) {
     }
 
     const deletedStock = await Item.findByIdAndDelete(id);
-    
+
     if (!deletedStock) {
       return NextResponse.json(
         { error: 'stock not found' },
@@ -188,9 +188,9 @@ export async function DELETE(request) {
     }
 
     return NextResponse.json(
-      { 
+      {
         message: 'stock deleted successfully',
-        stock: deletedStock 
+        stock: deletedStock
       },
       { status: 200 }
     );

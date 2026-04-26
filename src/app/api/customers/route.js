@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../lib/mongodb';
+import connectDB from '../../../../lib/mongodb';
 import Customer from '../../models/Customer';
 
 // Common validation function
@@ -11,7 +11,7 @@ const validateCustomerData = (body) => {
     phone: 'Phone is required'
   };
 
-  const missingFields = Object.keys(requiredFields).filter( 
+  const missingFields = Object.keys(requiredFields).filter(
     field => !body[field] || body[field].trim() === ''
   );
 
@@ -63,16 +63,16 @@ export async function POST(request) {
     await newCustomer.save();
 
     return NextResponse.json(
-      { 
-        message: 'Customer created successfully', 
-        customer: newCustomer 
-      }, 
+      {
+        message: 'Customer created successfully',
+        customer: newCustomer
+      },
       { status: 201 }
     );
   } catch (error) {
     console.error('API error:', error);
     return NextResponse.json(
-      { error: 'Internal Server Error' }, 
+      { error: 'Internal Server Error' },
       { status: 500 }
     );
   }
@@ -81,10 +81,10 @@ export async function POST(request) {
 export async function PUT(request) {
   try {
     await connectDB();
-    
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
@@ -131,7 +131,7 @@ export async function PUT(request) {
     );
 
     return NextResponse.json(
-      { 
+      {
         message: 'Customer updated successfully',
         customer: updatedCustomer
       },
@@ -149,10 +149,10 @@ export async function PUT(request) {
 export async function DELETE(request) {
   try {
     await connectDB();
-    
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
       return NextResponse.json(
         { error: 'Customer ID is required' },
@@ -161,7 +161,7 @@ export async function DELETE(request) {
     }
 
     const deletedCustomer = await Customer.findByIdAndDelete(id);
-    
+
     if (!deletedCustomer) {
       return NextResponse.json(
         { error: 'Customer not found' },
@@ -170,9 +170,9 @@ export async function DELETE(request) {
     }
 
     return NextResponse.json(
-      { 
+      {
         message: 'Customer deleted successfully',
-        customer: deletedCustomer 
+        customer: deletedCustomer
       },
       { status: 200 }
     );
@@ -188,10 +188,10 @@ export async function DELETE(request) {
 export async function GET(request) {
   try {
     await connectDB();
-    
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (id) {
       // Get single customer
       const customer = await Customer.findById(id);
@@ -205,7 +205,7 @@ export async function GET(request) {
     } else {
       // Get all customers
       const customers = await Customer.find().sort({ createdAt: -1 });
-      return NextResponse.json(customers.map(customer => ({ customer })));
+      return NextResponse.json(customers);
     }
   } catch (error) {
     console.error('Error fetching customers:', error);
